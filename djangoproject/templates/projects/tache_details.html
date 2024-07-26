@@ -1,0 +1,260 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+
+<div class="row g-5">
+    <div class="col-md-4 col-lg-4 order-md-last mt-2">
+
+      <div class="card-body mb-3">
+        <h5 class="card-title">Tâche assigné à:   </h5>
+        {% for assignation in assignations %}
+          {% for collaborateur in collaborateurs %}
+            {% if assignation.collaborateur_id == collaborateur.id %}
+            <button type="button" class="btn btn-outline-secondary mt-2">{{collaborateur.nom}} {{collaborateur.prenom}}</button>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        
+      </div>
+
+      <div class="collapse" id="collapseassigner">
+        <form method="POST" action="{% url "assigner_tache" %}" class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5">
+          {% csrf_token %}
+            <h1 class="h3 mb-3 fw-normal text-center mt-3">Assigner la tâche à:</h1>
+            <input type="text" hidden class="form-control" name="tache_id" value="{{tache.id}}">
+            <select class="form-select" aria-label="Default select example" name="collaborateur">
+              <option selected>Assigner à un autre collaborateur</option>
+              {% for collaborateur in collaborateurs %}
+              <option value="{{ collaborateur.id }}" >{{ collaborateur.nom }} {{collaborateur.prenom}}</option>
+              {% endfor %}
+            </select>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-light mb-3" style="background-color:#198754;">Assigner</button>
+          </div>
+        </form>
+        
+      </div>
+
+      {% if user.username == project.chef_id or user.is_superuser and tache.statut != 'Terminé' %}
+        <div>
+          <button class="w-100 btn btn-light" style="background-color:#198754;" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePiece" aria-expanded="false" aria-controls="collapsePiece">
+            Ajouter une pièce jointe
+          </button>
+        </div>
+        {% endif %}
+        {% if assignation.collaborateur_id == collaborateur.id %}
+        <div class="mt-1">
+          <button class="w-100 btn btn-light" style="background-color:#198754;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRendu" aria-expanded="false" aria-controls="collapseRendu">
+            Rendre la tâche
+          </button>
+        </div>
+        {% endif %}
+        <div class="mt-1">
+          <button class="w-100 btn btn-light" style="background-color:#198754;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Messagerie
+          </button>
+        </div>
+          
+      
+        <div class="collapse" id="collapsePiece">
+          <form class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5" action="{% url "upload_fichier" tache.id%}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h1 class="h3 mb-3 fw-normal text-center mt-3">Ajouter une pièce jointe</h1>
+            <label for="file" class="form-label">Titre</label>
+            <input class="form-control" id="file" type="text" name="nom">
+            <input class="form-control" type="file" name="fichier">
+            <button class="btn btn-light" style="background-color:#198754;" type="submit">Ajouter</button>  
+          </form>
+        </div>
+        <div class="collapse" id="collapseRendu">
+          <form class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5" action="{% url "upload_fichier" tache.id%}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h1 class="h3 mb-3 fw-normal text-center mt-3">Rendre la tâche</h1>
+            <input class="form-control" hidden value="{{tache.id}}" id="file" type="text" name="nom">
+            <input class="form-control" type="file" name="fichier">
+            <button class="btn btn-light" style="background-color:#198754;" type="submit">Rendre</button>
+          </form>
+        </div>
+
+        
+
+
+      
+    </div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Messages</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="height:400px; overflow:scroll !important;">
+          <div class="d-flex flex-column justify-content-end"   id="messenger">
+            
+            
+            
+            {% for message in messages %}
+            {% if message.expediteur_id == user.id %}
+            <p class="d-flex  justify-content-end mb-0">
+              <span class="bg-secondary text-gray-100 rounded-5 text-end p-1" style="width:auto;">
+                {{message.contenu}}
+              </span>
+              <p class="text-small text-gray-400 text-end py-0 m-0">Moi</p>
+            </p>
+            {% elif message.expediteur_id != user.id %}
+            <p class="d-flex justify-content-start mb-0">
+              <span class="bg-info text-gray-100 rounded-5 text-start p-1" style="width:auto;">
+                {{message.contenu}}
+              </span>
+              <p class="text-small text-gray-400 text-start py-0 m-0">
+                  {% for collaborateur in collaborateurs %}
+                    {% if message.expediteur_id == collaborateur.user_id%}
+                      {{collaborateur.nom}}
+                    {% endif %}
+                  {% endfor %}</p>
+            </p>
+            {% endif %}
+            {% endfor %}
+          </div>
+      </div>
+      <div class="modal-footer">
+        <form class="d-flex w-100" style="position:relative; z-index:2;" action="{% url "envoyer_message" tache.id%}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input class="form-control" id="message" type="text" name="contenu" style="width:80%;">
+          <button class="btn btn-light mx-1" style="background-color:#198754; " type="submit">Envoyer</button>  
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="col-md-8 p-0 mt-2">
+      <h4 class="d-flex justify-content-between align-items-center mb-3 fw-300">
+        <span class="text-secondary">Tâche: {{tache.libellé}} | Statut: {{tache.statut}}</span>
+        
+        {% if user.username == project.chef_id or user.is_superuser and tache.statut != 'Terminé' %}
+      <p class="d-flex gap-2">
+        
+        <button class="w-30 btn btn-light" style="background-color:#198754;" type="button" data-bs-toggle="collapse" data-bs-target="#collapsemodifier" aria-expanded="false" aria-controls="collapsemodifier">
+          Modifier la tache
+        </button>
+        <button class="w-30 btn btn-light" style="background-color:#198754;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseassigner" aria-expanded="false" aria-controls="collapseassigner">
+          Assigner la tâche
+        </button>
+          
+      </p>
+      {% endif %}
+      </h4>
+      <div class="collapse" id="collapsemodifier">
+        <form method="POST" action="{% url "update_tache" tache.id%}" class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5">
+          {% csrf_token %}
+          <h4 class="h3 mb-3 fw-normal text-center mt-3">Modifier les détails de la tache</h4>
+          
+
+          <div class="col-12">
+              <label for="inputCode" class="form-label">Libellé</label>
+              <input type="text" name="libelle" class="form-control" id="inputCode" value="{{tache.libellé}}">
+          </div>
+
+          <div class="col-12">
+              <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" name="description" rows="10">{{tache.description}}</textarea>
+          </div>
+          
+          <div class="col-5">
+            <label for="inputCode" class="form-label">Date de début</label>
+            <input type="date" name="date_debut" class="form-control" id="inputCode" value="{{tache.date_debut}}">
+          </div>
+
+            <div class="col-2">
+                <label for="inputCode" class="form-label">Delai</label>
+                <input type="number" name="delai" class="form-control" id="inputCode" value="{{tache.delai}}">
+            </div>
+
+            <div class="col-5">
+                <label for="inputCode" class="form-label">Date de fin</label>
+                <input type="date" name="date_fin" class="form-control" id="inputCode" value="{{tache.date_fin}}">
+            </div>
+
+            <div class="d-flex">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="statut" value="En cours" id="flexCheckDefault" checked>
+                <label class="form-check-label" for="flexCheckDefault">
+                  En cours
+                </label>
+              </div>
+              <p class="px-3">OU</p>
+              <div class="form-check">
+                <input class="form-check-input" name="statut" type="checkbox" value="Terminé" id="flexCheckChecked" >
+                <label class="form-check-label" for="flexCheckChecked">
+                  Terminé
+                </label>
+              </div>
+            </div>
+            
+          <div class="col-12 d-flex flex-row-reverse">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+      <div class="row row-cols-1 row-cols-md-1 g-6 d-inline">
+        <div class="mb-3" style="width: auto;">
+          <div class="card-body">
+            <h4 class="card-subtitle mb-2 text-body-secondary">Description:</h4>
+            <p class="card-text">{{tache.description}}</p>
+          </div>
+        </div>
+
+        <div class="mb-3" style="width: auto;">
+          <div class="card-body">
+            
+          </div>
+
+          <div class="accordion accordion-flush" id="accordionFlushExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                  Ressources (Images & Documents)
+                </button>
+              </h2>
+              <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">
+                  {% for piece in pieces %}
+                   {% if piece.id != tache.id %}
+                   <a href="{% url 'telecharger_fichier' piece.id %}" class="btn btn-outline-info mt-2"><img src="{{piece.file}}" alt="{{piece.titre}}" ></a>                   
+                   {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                  Rendu de la tâche
+                </button>
+              </h2>
+              <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">
+                  {% for piece in pieces %}
+                  {% if piece.titre == tache.id %}
+                    <a href="{% url 'telecharger_fichier' piece.id %}" class="btn btn-outline-info mt-2">{{piece.file}}</a>                   
+                  {% endif %}
+                 {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+        </div>
+        
+    </div>
+  </div>
+
+{% endblock content %}

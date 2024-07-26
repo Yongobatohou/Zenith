@@ -1,0 +1,47 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+            <div>
+                <div class="bg-body-tertiaryp-5 rounded">
+                    <div class="d-flex justify-content-end">
+                      <a class="btn btn-light mb-4" style="background-color:#198754;" href="/add_type_collaborateur/">Ajouter un type de Collaborateur</a>
+                    </div>
+                    <div class="col-sm-8 mx-auto">
+                        <div class="card shadow mb-4">
+                          <div class="card-header py-3">
+                              <h6 class="m-0 font-weight-bold" style="color:#056d8a;">Liste des types de Collaborateurs</h6>
+                          </div>
+                          <div class="card-body">
+                              <div class="table-responsive">
+                                  <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                      <thead>
+                                          <tr>
+                                            <th scope="col" class="col-2">Code</th>
+                                            <th scope="col" class="col-7">Nom</th>
+                                            <th scope="col" class="col-3">Actions</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for type in types %}
+                                        <tr>
+                                          <th scope="row" class="col-2">{{type.code}}</th>
+                                          <td>{{type.nom}}</td>
+                                          <td class="d-flex justify-content-around">
+                                              <a class="btn btn-warning p-0" style="width:40px; height:35px;" href="/edit_type_collaborateur/{{type.code}}"><img src="{% static "logo/icons8-modifier.svg" %}" alt="edit-icon" width="30px" height="30px" /></a>
+                                              <a class="btn btn-danger p-0" style="width:40px; height:35px;" href="{% url "delete_type" type.code%}"><img src="{% static "logo/icons8-supprimer.svg" %}" alt="delete-icon" width="30px" height="30px" /> </a>
+                                          </td>
+                                        </tr>
+                                        {% endfor %}
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock content %}

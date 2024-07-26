@@ -1,0 +1,91 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+
+
+
+<div class="row g-5">
+    <div class="col-md-5 col-lg-4 order-md-last">
+      <h4 class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-primary">Détails du Projet</span>
+      </h4>
+      <div class="card mb-3" style="width: auto;">
+        <div class="card-body">
+          <h5 class="card-title">Nom:  {{project.titre}}</h5>
+          <h6 class="card-subtitle mb-2 text-body-secondary">Description:</h6>
+          <p class="card-text">{{project.description}}</p>
+        </div>
+      </div>
+
+      <p class="d-inline-flex gap-1">
+        <button class="w-100 btn btn-light btn-lg" style="background-color:#198754;" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+          Modifier le projet
+        </button>
+      </p>
+      <div class="collapse" id="collapseExample">
+        <form method="POST" action="{% url "update_project" project.id%}" class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5">
+          {% csrf_token %}
+          <h1 class="h3 mb-3 fw-normal text-center mt-3">Modifier les informations du Projet</h1>
+
+          <div class="col-12">
+              <label for="inputCode" class="form-label">Titre</label>
+              <input type="text" name="titre" class="form-control" id="inputCode" value="{{project.titre}}">
+          </div>
+
+          <div class="col-12">
+              <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" name="description" rows="10">{{project.description}}</textarea>
+          </div>
+          
+          <div class="col-md-12">
+              <label for="inputType" class="form-label">Chef Projet</label>
+              <select id="inputType" name="chef" class="form-select">
+                
+                
+                {% for collaborateur in collaborateurs %}
+                {% if project.chef_id == collaborateur.id %}
+                <option selected desabled value="{{project.chef_id}}">{{ collaborateur.nom }} {{collaborateur.prenom}}</option>
+                {% endif %}
+                <option value="{{ collaborateur.id }}" >{{ collaborateur.nom }} {{collaborateur.prenom}}</option>
+                {% endfor %}
+                
+              </select>
+            </div>
+
+          <div class="col-12 d-flex flex-row-reverse">
+            <button type="submit" class="btn btn-light" style="background-color:#198754;">Ajouter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-7 col-lg-8">
+      <h4 class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-primary">Tâches du projet</span>
+        <a class="btn btn-light" style="background-color:#198754;" href="/add_tache/{{project.id}}">Ajouter une tâche</a>
+      </h4>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for tache in taches %}
+        <div class="card p-0">
+          {% if tache.statut == 'En cours' %}
+          <h5 class="card-header bg-secondary"><a style="text-decoration:none; color:black;" href="/tache_details/">{{tache.libellé}}</a></h5>
+          {% elif tache.statut == 'Terminé' %}
+          <h5 class="card-header" style="background-color:#198754;"><a style="text-decoration:none; color:black;" href="/tache_details/">{{tache.libellé}}</a></h5>
+          {% endif %}<div class="card-body">
+              <p class="card-text">{{tache.description}}</p>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              <a href="/tache_details/{{tache.id}}" class="btn btn-light" style="background-color:#198754;">Détails</a>
+              <a class="btn btn-danger" href="{% url "delete_tache" tache.id%}"><img src="{% static "logo/icons8-supprimer.svg" %}" alt="delete-icon" width="25px" height="25px" /></a>
+            </div>
+          </div>
+        {% endfor %}
+    
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}

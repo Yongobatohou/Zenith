@@ -1,0 +1,45 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+
+<div class="mt-5">
+    <div class="bg-body-tertiaryp-5 rounded mt-5">
+        <div class="col-sm-5 mx-auto mt-5">
+            <form method="POST" action="{% url "create_project" %}" class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5">
+                {% csrf_token %}
+                <h1 class="h3 mb-3 fw-normal text-center mt-3">Ajouter un Projet</h1>
+
+                <div class="col-12">
+                    <label for="inputCode" class="form-label">Titre</label>
+                    <input type="text" name="titre" class="form-control" id="inputCode">
+                </div>
+
+                <div class="col-12">
+                    <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+                    <textarea class="form-control" name="description" id="exampleFormControlTextarea1" rows="10"></textarea>
+                </div>
+                
+                <div class="col-md-12">
+                    <label for="inputType" class="form-label">Chef Projet</label>
+                    <select id="inputType" name="chef" class="form-select">
+                      <option selected desabled value="">Choisissez un chef pour ce projet...</option>
+                      
+                      {% for collaborateur in collaborateurs %}
+                      <option value="{{ collaborateur.id }}" >{{ collaborateur.nom }} {{collaborateur.prenom}}</option>
+                      {% endfor %}
+                      
+                    </select>
+                  </div>
+
+                <div class="col-12 d-flex flex-row-reverse">
+                  <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+              </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

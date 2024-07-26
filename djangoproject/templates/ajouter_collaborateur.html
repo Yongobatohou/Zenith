@@ -1,0 +1,60 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+            <div class="mt-5">
+                <div class="bg-body-tertiaryp-5 rounded mt-5">
+                    <div class="col-sm-5 mx-auto mt-5">
+                        <form method="POST" action="{% url "create_col" %}" class="row g-3 shadow-lg p-3 mb-5 bg-body-tertiary rounded mt-5">
+                            <h1 class="h3 mb-3 fw-normal text-center mt-3">Ajouter un collaborateur</h1>
+                            {% csrf_token %}
+                            <div class="col-12">
+                                <label for="inputName" class="form-label">Nom</label>
+                                <input type="text" name="nom" class="form-control" id="inputName" placeholder="Votre nom">
+                                <input type="hidden" name="id" class="form-control" value="" id="inputName" placeholder="Votre id">
+                            </div>
+                            <div class="col-12">
+                                <label for="inputSurname" class="form-label">Prénom</label>
+                                <input type="text" name="prenom" class="form-control" id="inputSurname" placeholder="Votre/Vos prénom(s)">
+                            </div>
+                            <div class="col-md-6">
+                              <label for="burnDate" class="form-label">Date de naissance</label>
+                              <input type="date" name="burnDate" class="form-control" id="burnDate">
+                            </div>
+                            <div class="col-md-12">
+                              <label for="inputPassword4" class="form-label">Mot de passe</label>
+                              <input type="password" name="password" class="form-control" id="inputPassword4">
+                            </div>
+                            {% if erreur %}
+                              <p class="alert alert-danger">{{erreur}}</p>
+                            {% endif %}
+                            <div class="col-md-12">
+                                <label for="confirmPassword" class="form-label">Confirmer votre mot de passe</label>
+                                <input type="password" name="password_confirmation" class="form-control" id="confirmPassword">
+                            </div>
+                            <div class="col-md-6">
+                              <label for="inputLevel" class="form-label">Niveau d'Etude</label>
+                              <input type="text" name="level" class="form-control" id="inputLevel">
+                            </div>
+                            <div class="col-md-6">
+                              <label for="inputType" class="form-label">Type de Collaborateur</label>
+                              <select id="inputType" name="type" class="form-select">
+                                <option selected desabled value="">Choisissez un type...</option>
+                                
+                                {% for type in types %}
+                                <option value="{{ type.code }}" >{{ type.nom }}</option>
+                                {% endfor %}
+                                
+                              </select>
+                            </div>
+                            <div class="col-12 d-flex flex-row-reverse">
+                              <button type="submit" class="btn btn-light" style="background-color:#198754;">Ajouter</button>
+                            </div>
+                          </form>
+                    </div>
+                </div>
+            </div>
+
+{% endblock content %}
